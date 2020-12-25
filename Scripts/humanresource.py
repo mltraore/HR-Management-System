@@ -9,10 +9,20 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from hr import HRRetention
+import view_data as vd
+import matplotlib.pyplot as plt
+import classifiers
+import pandas as pd
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
+        ######
+        self.data_w = vd.ShowData()
+        self.data_w.setVisible(False)
+        self.hr = HRRetention()
+        self.data = pd.read_csv('../data_sets/HR_comma_sep.csv')
+        ######
         Dialog.setObjectName("Dialog")
         Dialog.resize(1018, 762)
         self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
@@ -447,21 +457,21 @@ class Ui_Dialog(object):
         self.myTab.addTab(self.tab_8, "")
         self.tabFinance = QtWidgets.QWidget()
         self.tabFinance.setObjectName("tabFinance")
-        self.pushButton_22 = QtWidgets.QPushButton(self.tabFinance)
-        self.pushButton_22.setGeometry(QtCore.QRect(460, 130, 131, 91))
-        self.pushButton_22.setObjectName("pushButton_22")
-        self.pushButton_26 = QtWidgets.QPushButton(self.tabFinance)
-        self.pushButton_26.setGeometry(QtCore.QRect(660, 130, 131, 91))
-        self.pushButton_26.setObjectName("pushButton_26")
-        self.pushButton_20 = QtWidgets.QPushButton(self.tabFinance)
-        self.pushButton_20.setGeometry(QtCore.QRect(230, 130, 131, 91))
-        self.pushButton_20.setObjectName("pushButton_20")
+        self.btn_showdata = QtWidgets.QPushButton(self.tabFinance)
+        self.btn_showdata.setGeometry(QtCore.QRect(460, 130, 150, 80))
+        self.btn_showdata.setObjectName("btn_showdata")
+        self.btn_eval_class = QtWidgets.QPushButton(self.tabFinance)
+        self.btn_eval_class.setGeometry(QtCore.QRect(660, 130, 150, 80))
+        self.btn_eval_class.setObjectName("btn_eval_class")
+        self.btn_compare_left = QtWidgets.QPushButton(self.tabFinance)
+        self.btn_compare_left.setGeometry(QtCore.QRect(230, 130, 150, 80))
+        self.btn_compare_left.setObjectName("btn_compare_left")
         self.pushButton_23 = QtWidgets.QPushButton(self.tabFinance)
         self.pushButton_23.setGeometry(QtCore.QRect(440, 460, 131, 91))
         self.pushButton_23.setObjectName("pushButton_23")
-        self.pushButton_27 = QtWidgets.QPushButton(self.tabFinance)
-        self.pushButton_27.setGeometry(QtCore.QRect(650, 460, 131, 91))
-        self.pushButton_27.setObjectName("pushButton_27")
+        self.btn_get_predicts = QtWidgets.QPushButton(self.tabFinance)
+        self.btn_get_predicts.setGeometry(QtCore.QRect(650, 460, 131, 91))
+        self.btn_get_predicts.setObjectName("btn_get_predicts")
         self.pushButton_24 = QtWidgets.QPushButton(self.tabFinance)
         self.pushButton_24.setGeometry(QtCore.QRect(220, 460, 131, 91))
         self.pushButton_24.setObjectName("pushButton_24")
@@ -502,6 +512,14 @@ class Ui_Dialog(object):
         self.retranslateUi(Dialog)
         self.myTab.setCurrentIndex(7)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+
+
+        ############ ################# ###################
+        self.btn_showdata.clicked.connect(self.show_data)
+        self.btn_compare_left.clicked.connect(self.compare_left)
+        self.btn_eval_class.clicked.connect(self.evaluate_classifiers)
+        self.btn_get_predicts.clicked.connect(self.get_predicts)
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
@@ -584,11 +602,13 @@ class Ui_Dialog(object):
         self.label_25.setText(_translate("Dialog", "Personel"))
         self.myTab.setTabText(self.myTab.indexOf(self.tab_2), _translate("Dialog", "Update Personel"))
         self.myTab.setTabText(self.myTab.indexOf(self.tab_8), _translate("Dialog", "Application management system"))
-        self.pushButton_22.setText(_translate("Dialog", "Show Data "))
-        self.pushButton_26.setText(_translate("Dialog", "Evaluate Classifiers"))
-        self.pushButton_20.setText(_translate("Dialog", "HR Retention "))
+
+        ###################         #######################################
+        self.btn_showdata.setText(_translate("Dialog", "Show Data "))
+        self.btn_eval_class.setText(_translate("Dialog", "Evaluate Classifiers"))
+        self.btn_compare_left.setText(_translate("Dialog", "Department Analysis"))
         self.pushButton_23.setText(_translate("Dialog", "HR Retention "))
-        self.pushButton_27.setText(_translate("Dialog", "HR Retention "))
+        self.btn_get_predicts.setText(_translate("Dialog", "Get Predictions "))
         self.pushButton_24.setText(_translate("Dialog", "HR Retention "))
         self.myTab.setTabText(self.myTab.indexOf(self.tabFinance), _translate("Dialog", "Human Analyzer"))
         self.pushButton.setText(_translate("Dialog", "Show Salaries"))
@@ -597,10 +617,34 @@ class Ui_Dialog(object):
         self.myTab.setTabText(self.myTab.indexOf(self.tab_3), _translate("Dialog", "Financial Operations"))
 
 
+    ##### clicked function
+    def show_data(self):
+        self.data_w.view_data(self.data)
+        self.data_w.show()
+
+    def compare_left(self):
+        self.hr.describe()
+
+    def evaluate_classifiers(self):
+        classifiers.evaluate()
+
+    def get_predicts(self):
+        accs = [94.96, 76.0, 97.92, 99.03999999999999, 96.16, 97.81333333333333, 78.16, 78.0, 91.33333333333333]
+        results = classifiers.predict(accs)
+        # print(results)
+        self.data_w.view_data(results)
+        self.data_w.show()
+
+
+
+
 if __name__ == "__main__":
     import sys
+    from PyQt5.QtCore import pyqtRemoveInputHook
+    pyqtRemoveInputHook()
     app = QtWidgets.QApplication(sys.argv)
     Dialog = QtWidgets.QDialog()
+
     ui = Ui_Dialog()
     ui.setupUi(Dialog)
     Dialog.show()
